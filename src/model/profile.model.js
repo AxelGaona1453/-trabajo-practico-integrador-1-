@@ -32,7 +32,9 @@ export const ProfileModel = sequelize.define('Profile', {
 UserModel.hasOne(ProfileModel, { foreignKey: 'user_id', as: 'profile' });
 ProfileModel.belongsTo(UserModel, { foreignKey: 'user_id', as: 'profile' });
 
-const profile = await ProfileModel.findOne({
-	where: { user_id: user.dataValues.id },
+UserModel.addHook('afterDestroy', async (user) => {
+	const profile = await ProfileModel.findOne({
+		where: { user_id: user.dataValues.id },
+	});
+	await profile.destroy();
 });
-await profile.destroy();

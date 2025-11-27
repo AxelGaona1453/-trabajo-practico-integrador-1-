@@ -1,5 +1,5 @@
 import { Router } from 'express';
-const routerProfile = Router();
+export const routerProfile = Router();
 import {
 	updateProfile,
 	findAllProfiles,
