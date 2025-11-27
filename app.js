@@ -8,15 +8,11 @@ import { ProfileModel } from './src/models/profile.model.js';
 import { TagModel } from './src/models/tag.model.js';
 import { ArticleModel } from './src/models/article.model.js';
 import { ArticleTagModel } from './src/models/article_tag.model.js';
-import { register } from './src/controllers/auth.controllers.js';
-import { login } from './src/controllers/auth.controllers.js';
-import { logout } from './src/controllers/auth.controllers.js';
+import { authRoutes } from './src/routes/auth.routes.js';
 
 const app = express();
 dotenv.config();
-app.use('/api/register', register);
-app.use('/api/login', login);
-app.use('/api/logout', logout);
+app.use('/api/auth/', authRoutes);
 
 const PORT = 3004;
 const corsOptions = {
