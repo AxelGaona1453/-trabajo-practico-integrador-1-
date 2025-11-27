@@ -34,3 +34,4 @@ app.listen(PORT, async () => {
 	DBStart();
 	console.log(`Servidor encendido y corriendo en https://localhost:${PORT}`);
 });
+//ya anda to xd
