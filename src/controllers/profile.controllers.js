@@ -1,15 +1,15 @@
-import { UserModel } from '../models/user.model.js';
+import { ProfileModel } from '../models/profile.model.js';
 import { matchedData } from 'express-validator';
 
-export const findAllUsers = async (req, res) => {
-	const findAll = await UserModel.findAll();
+export const findAllProfiles = async (req, res) => {
+	const findAll = await ProfileModel.findAll();
 	res.status(200).json(findAll);
 };
 
-export const findUserById = async (req, res) => {
-	const userID = parseInt(req.params.id);
+export const findProfileById = async (req, res) => {
+	const profileID = parseInt(req.params.id);
 	try {
-		if (isNaN(userID)) {
+		if (isNaN(profileID)) {
 			return res.status(400).json({
 				message: 'Error: El ID debe ser un número',
 				error: 'Bad request',
@@ -17,7 +17,7 @@ export const findUserById = async (req, res) => {
 			});
 		}
 
-		const findID = await UserModel.findByPk(userID);
+		const findID = await ProfileModel.findByPk(profileID);
 
 		if (!findID) {
 			return res.status(404).json({
@@ -32,17 +32,17 @@ export const findUserById = async (req, res) => {
 	}
 };
 
-export const updateUser = async (req, res) => {
-	const userID = parseInt(req.params.id);
-	const { username, email, password } = req.body;
-	if (!username || !email || !password) {
+export const updateProfile = async (req, res) => {
+	const profileID = parseInt(req.params.id);
+	const { first_name, last_name, biography, avatar_url, birthday } = req.body;
+	if (!first_name || !last_name) {
 		return res.status(400).json({
-			message: 'Error: Algunos campos están vacíos',
+			message: 'Error: Hay campos vacíos',
 			error: 'Bad request',
 			status: 400,
 		});
 	}
-	if (isNaN(userID)) {
+	if (isNaN(profileID)) {
 		return res.status(400).json({
 			message: 'Error: El ID debe ser un número',
 			error: 'Bad request',
@@ -50,7 +50,7 @@ export const updateUser = async (req, res) => {
 		});
 	}
 	try {
-		const findID = await UserModel.findByPk(userID);
+		const findID = await ProfileModel.findByPk(profileID);
 		if (!findID) {
 			return res.status(404).json({
 				message: 'Error: Ese ID no existe',
@@ -58,33 +58,29 @@ export const updateUser = async (req, res) => {
 				status: 404,
 			});
 		}
-		const checkIfEmailExists = await UserModel.findOne({
-			where: { email: email, id: { [Op.ne]: id } },
-		});
-		if (checkIfEmailExists) {
-			return res.status(400).json({
-				message: 'Error: Ese usuario ya existe',
-				error: 'Bad request',
-				status: 400,
-			});
-		}
 		const validatedData = matchedData(req, { locations: ['body'] });
 		console.log('Los datos validados son:', validatedData);
-		await findID.update({ username, email, password });
+		await findID.update({
+			first_name,
+			last_name,
+			biography,
+			avatar_url,
+			birthday,
+		});
 		res.status(200).json('Datos actualizados');
 	} catch (error) {
 		return res.status(500).json({
-			message: 'Error: Error al actualizar usuario',
+			message: 'Error: Error al actualizar el perfil',
 			error: 'Internal server error',
 			status: 500,
 		});
 	}
 };
 
-export const deleteUser = async (req, res) => {
-	const userID = parseInt(req.params.id);
-	const findID = await UserModel.findByPk(userID);
-	if (isNaN(userID)) {
+export const deleteProfile = async (req, res) => {
+	const profileID = parseInt(req.params.id);
+	const findID = await ProfileModel.findByPk(profileID);
+	if (isNaN(profileID)) {
 		return res.status(400).json({
 			message: 'Error: El ID debe ser un número',
 			error: 'Bad request',
@@ -94,16 +90,16 @@ export const deleteUser = async (req, res) => {
 	try {
 		if (!findID) {
 			return res.status(404).json({
-				message: 'Error: Ese usuario no existe',
+				message: 'Error: Ese perfil no existe',
 				error: 'Not found',
 				status: 404,
 			});
 		}
 		const deleteData = await findID.destroy();
-		res.status(200).json('Usuario eliminado.');
+		res.status(200).json('Perfil eliminado.');
 	} catch (error) {
 		return res(500).json({
-			message: 'Error: Error al eliminar el usuario',
+			message: 'Error: Error al eliminar el perfil',
 			error: 'Internal server error',
 			status: 500,
 		});
