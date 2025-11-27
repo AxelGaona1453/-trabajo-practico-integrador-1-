@@ -2,12 +2,32 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { comparePassword, generateToken } from '../helpers/jwt.helper.js';
 import { generateToken } from '../helpers/jwt.helper.js';
-import { hashPassword } from '../helpers/bcrypt.helper.js';
+import { hashPassword, comparePassword } from '../helpers/bcrypt.helper.js';
+import { ProfileModel } from '../models/profile.model.js';
 
 export const register = async (req, res) => {
-	const { username, email, password, role } = req.body;
+	const { username, email, password, role, first_name, last_name } = req.body;
 	try {
-		const hashedPassword = await bcrypt.hash(password, 10);
+		const hashedPassword = await hashPassword(password);
+
+		const checkIfUserExists = await UserModel.findOne({
+			where: { username: username },
+		});
+		if (checkIfUserExists) {
+			return res.status(400).json({
+				message: "Ese usuario ya está registrado",
+			});
+		}
+
+		const checkIfEmailExists = await UserModel.findOne({
+			where: { email: email },
+		});
+		if (checkIfEmailExists) {
+			return res.status(400).json({
+				message: "Ese email ya está registrado",
+			});
+		}
+
 		const user = await UserModel.create({
 			username: username,
 			email: email,
@@ -15,16 +35,18 @@ export const register = async (req, res) => {
 			role: role,
 		});
 
-		res.status(201).json({
-			msg: 'Usuario registrado correctamente',
+		await ProfileModel.create({
+			first_name: first_name,
+			last_name: last_name,
+			user_id: user.id,
 		});
-	} catch (error) {
-		res.status(500).json({
-			msg: 'Error interno del servidor',
+
+		res.status(201).json({
+			msg: "Usuario registrado correctamente",
 		});
 	}
 };
-
+	
 export const login = async (req, res) => {
 	const { username, password } = req.body;
 	try {

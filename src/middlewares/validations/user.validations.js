@@ -1,5 +1,5 @@
-import { body, param } from 'express-validator';
-import { UserModel } from '../models/user.model.js';
+import { body } from 'express-validator';
+import { UserModel } from '../../models/user.model.js';
 import { Op } from 'sequelize';
 
 export const createUserValidation = [
@@ -17,3 +17,11 @@ export const createUserValidation = [
 		.withMessage('El username debe contener caracteres alfanuméricos.')
 		.isLength({ min: 3, max: 20 }),
 ];
+body('email')
+	.trim()
+	.custom(async (value) => {
+		const emailExists = UserModel.findOne({ where: { email: value } });
+		if (emailExists) {
+			throw new Error('Ese email ya se ha registrado.');
+		}
+	});
